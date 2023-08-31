@@ -1,0 +1,60 @@
+version: "3.8"
+
+services:
+  stellar-scope:
+    build:
+      context: .
+    ports:
+      - "8080:1323"
+    restart: on-failure
+    container_name: astro
+    environment:
+      - APP_DB_PORT=${APP_DB_PORT:-5432}
+      - APP_DB_NAME=${APP_DB_NAME:-images}
+      - APP_DB_PASSWORD=${APP_DB_PASSWORD:-qwerty}
+      - APP_DB_USERNAME=${APP_DB_USERNAME:-postgres}
+      - APOD_API_KEY=${APOD_API_KEY:-hexAwcWxOrEDePOQf3NrtOo78460rq8WplXhl3K9}
+    networks:
+      - astro
+    depends_on:
+      - postgres
+
+  track-flyway:
+      image: flyway/flyway:9-alpine
+      restart: on-failure
+      command: -url=jdbc:postgresql://postgres:5432/${APP_DB_NAME:-astro} -schemas=public -user=${APP_DB_USERNAME:-postgres} -password=${APP_DB_PASSWORD:-qwerty} migrate
+      volumes:
+        - .:/flyway/sql
+      depends_on:
+        postgres:
+          condition: service_healthy
+      networks:
+        astro:
+
+  postgres:
+    container_name: postgresql
+    image: postgres:14-alpine
+    restart: always
+    environment:
+      - POSTGRES_DB=${APP_DB_NAME:-user}
+      - POSTGRES_PASSWORD=${APP_DB_PASSWORD:-qwerty}
+      - POSTGRES_USER=${APP_DB_USERNAME:-postgres}
+    ports:
+      - ${APP_DB_PORT:-5432}:${APP_DB_PORT:-5432}
+    volumes:
+      - ./pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-q", "-U", "${APP_DB_NAME}" ]
+      interval: 5s
+      timeout: 1s
+      retries: 2
+    networks:
+      - astro
+
+volumes:
+  postgres:
+    name: pg-data
+
+networks:
+  astro:
+    driver: bridge
