@@ -32,7 +32,7 @@ services:
     volumes:
       - ./pg-data:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD", "pg_isready", "-q", "-U", "${APP_DB_NAME}" ]
+      test: [ "CMD", "pg_isready", "-q", "-U", "${APP_DB_USERNAME:-postgres}" ]
       interval: 5s
       timeout: 1s
       retries: 2
@@ -48,11 +48,6 @@ services:
       - MINIO_ROOT_PASSWORD=minioadmin
     ports:
       - "9000:9000"
-      - "9090:9001"
-    command:
-      - server
-      - /data
-      - --console-address ":9001"
     volumes:
       - ~/minio/data:/data
     networks:

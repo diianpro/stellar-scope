@@ -57,7 +57,7 @@ func New(loadConfigFn LoadConfigFn) *App {
 func (a *App) Start() {
 	defer a.cancelFn()
 
-	repo, err := postgres.New(a.ctx, a.cfg.Postgres)
+	repo, err := postgres.New(a.ctx, &a.cfg.Postgres)
 	if err != nil {
 		log.Fatal("Could not setup storage.")
 	}
