@@ -21,11 +21,11 @@ services:
 
   postgres:
     container_name: postgresql
-    image: postgres:14-alpine
+    image: postgres:13-alpine
     restart: always
     environment:
-      - POSTGRES_DB=${APP_DB_NAME:-user}
-      - POSTGRES_PASSWORD=${APP_DB_PASSWORD:-qwerty}
+      - POSTGRES_DB=${APP_DB_NAME:-image}
+      - POSTGRES_PASSWORD=${APP_DB_PASSWORD:-postgres}
       - POSTGRES_USER=${APP_DB_USERNAME:-postgres}
     ports:
       - ${APP_DB_PORT:-5432}:${APP_DB_PORT:-5432}
