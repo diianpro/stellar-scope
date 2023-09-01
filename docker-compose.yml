@@ -10,11 +10,10 @@ services:
     container_name: astro
     environment:
       - APP_DB_PORT=${APP_DB_PORT:-5432}
-      - APP_DB_NAME=${APP_DB_NAME:-images}
+      - APP_DB_NAME=${APP_DB_NAME:-image}
       - APP_DB_PASSWORD=${APP_DB_PASSWORD:-postgres}
       - APP_DB_USERNAME=${APP_DB_USERNAME:-postgres}
       - APOD_API_KEY=${APOD_API_KEY:-hexAwcWxOrEDePOQf3NrtOo78460rq8WplXhl3K9}
-        доплнить
     networks:
       - astro
     depends_on:
