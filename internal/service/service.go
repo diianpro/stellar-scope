@@ -2,31 +2,32 @@ package service
 
 import (
 	"context"
-	"github.com/diianpro/stellar-scope/internal/domain"
 	"time"
+
+	"github.com/diianpro/stellar-scope/internal/domain/apod"
+	"github.com/diianpro/stellar-scope/internal/domain/image"
 )
 
 type Picture interface {
-	GetByDate(ctx context.Context, date time.Time) (*domain.ApodData, error)
-	GetAll(ctx context.Context) ([]domain.ApodData, error)
+	GetByDate(ctx context.Context, date time.Time) (*apod.Data, error)
+	GetAll(ctx context.Context, limit, offset int) ([]apod.Data, error)
+	ObserveDailyImage(ctx context.Context) error
 }
 
-type ImageStorage interface {
-	Upload(ctx context.Context, image []byte, filename string) (string, error)
-	Download(ctx context.Context, date string) ([]byte, error)
-}
-
-type Storage interface {
-	domain.Repository
-	ImageStorage
+type ImageProvider interface {
+	GetMetadata(ctx context.Context, date time.Time) (*apod.Data, error)
 }
 
 type Service struct {
-	storage Storage
+	apodRps       apod.Repository
+	imageRps      image.Repository
+	imageProvider ImageProvider
 }
 
-func New(storage Storage) *Service {
+func New(apodRps apod.Repository, imageRps image.Repository, imageProvider ImageProvider) *Service {
 	return &Service{
-		storage: storage,
+		apodRps:       apodRps,
+		imageRps:      imageRps,
+		imageProvider: imageProvider,
 	}
 }

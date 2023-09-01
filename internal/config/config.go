@@ -2,14 +2,17 @@ package config
 
 import (
 	"github.com/caarlos0/env/v6"
+	log "github.com/sirupsen/logrus"
+
 	"github.com/diianpro/stellar-scope/internal/provider/apod"
 	"github.com/diianpro/stellar-scope/internal/storage/postgres"
-	log "github.com/sirupsen/logrus"
+	"github.com/diianpro/stellar-scope/internal/storage/s3"
 )
 
 type Config struct {
-	APOD     *apod.Config
-	Postgres postgres.Config
+	APOD         apod.Config
+	Postgres     postgres.Config
+	ImageStorage s3.Config
 }
 
 // New initialize Config structure

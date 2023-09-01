@@ -1,9 +1,9 @@
-CREATE TABLE IF NOT EXISTS images
+CREATE TABLE IF NOT EXISTS image
 (
-    date        varchar(255),
-    title       varchar(255),
-    explanation varchar(255),
-    image_link  varchar(255),
-    copyright   varchar(255)
+    "date"          date PRIMARY KEY,
+    title           varchar(255),
+    explanation     text,
+    image_extension varchar(16),
+    copyright       varchar(255)
 );
 

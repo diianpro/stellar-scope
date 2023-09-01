@@ -2,8 +2,9 @@ package postgres
 
 import (
 	"context"
-	"github.com/jackc/pgx/v4/pgxpool"
 	"net/url"
+
+	"github.com/jackc/pgx/v4/pgxpool"
 )
 
 type Repository struct {
@@ -32,4 +33,8 @@ func New(ctx context.Context, cfg *Config) (*Repository, error) {
 
 	return &Repository{db: conn}, nil
 
+}
+
+func (r *Repository) Close() {
+	r.db.Close()
 }

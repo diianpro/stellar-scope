@@ -80,7 +80,7 @@ func (c *Container) Purge() error {
 
 func ApplyMigrate(databaseUrl string) {
 	mig, err := migrate.New(
-		"file:///home/diana/stellar-scope/migration",
+		"file://../../../migration",
 		databaseUrl)
 	if err != nil {
 		log.Errorf("failed to create migrations instance: %v", err)

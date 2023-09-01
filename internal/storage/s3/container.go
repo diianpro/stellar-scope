@@ -5,22 +5,13 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"os"
 	"strconv"
 
 	"github.com/ory/dockertest"
 	"github.com/ory/dockertest/docker"
 )
 
-var hostName = os.Getenv("OVERRIDE_HOSTNAME")
-
-func init() {
-	const defaultHostName = "localhost"
-
-	if hostName == "" {
-		hostName = defaultHostName
-	}
-}
+const defaultHostName = "localhost"
 
 type Container struct {
 	resource *dockertest.Resource
@@ -48,13 +39,9 @@ func NewContainer() (*Container, error) {
 			},
 			PortBindings: map[docker.Port][]docker.PortBinding{
 				"9000/tcp": {{
-					HostIP:   hostName,
+					HostIP:   defaultHostName,
 					HostPort: strconv.Itoa(hostPort),
 				}},
-			},
-			Auth: docker.AuthConfiguration{
-				Username: os.Getenv("ARTIFACTORY_USER"),
-				Password: os.Getenv("ARTIFACTORY_PWD"),
 			},
 		}, func(config *docker.HostConfig) {
 			config.AutoRemove = true
@@ -69,7 +56,7 @@ func NewContainer() (*Container, error) {
 	container := &Container{
 		resource: resource,
 	}
-	addr := fmt.Sprintf("%s:%s", hostName, resource.GetPort("9000/tcp"))
+	addr := fmt.Sprintf("%s:%s", defaultHostName, resource.GetPort("9000/tcp"))
 	uri := fmt.Sprintf("http://%s/minio/health/live", addr)
 	container.addr = addr
 	if err = pool.Retry(func() error {

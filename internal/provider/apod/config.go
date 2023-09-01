@@ -1,6 +1,6 @@
 package apod
 
 type Config struct {
-	Address string `json:"address"`
-	ApiKey  string `json:"api_key"`
+	Address string `env:"ADDRESS,required"`
+	ApiKey  string `env:"API_KEY,required"`
 }
