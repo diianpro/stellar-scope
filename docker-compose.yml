@@ -9,11 +9,13 @@ services:
     restart: on-failure
     container_name: astro
     environment:
-      - APP_DB_PORT=${APP_DB_PORT:-5432}
-      - APP_DB_NAME=${APP_DB_NAME:-image}
-      - APP_DB_PASSWORD=${APP_DB_PASSWORD:-postgres}
-      - APP_DB_USERNAME=${APP_DB_USERNAME:-postgres}
+      - DB_URL=${DB_URL:-postgres://su:su@localhost:5432/postgres?sslmode=disable}
+      - MIN_CONNS=${MIN_CONNS:-1}
+      - MAX_CONNS=${MAX_CONNS:-3}
+      - APOD_ADDRESS=${APOD_API_KEY:-"https://api.nasa.gov/planetary/apod"}
       - APOD_API_KEY=${APOD_API_KEY:-hexAwcWxOrEDePOQf3NrtOo78460rq8WplXhl3K9}
+      - BUCKET=${BUCKET:-images}
+      - REGION=${REGION:-"us-east-1"}
     networks:
       - astro
     depends_on:
@@ -21,18 +23,18 @@ services:
 
   postgres:
     container_name: postgresql
-    image: postgres:13-alpine
+    image: postgres:15-alpine
     restart: always
     environment:
-      - POSTGRES_DB=${APP_DB_NAME:-image}
-      - POSTGRES_PASSWORD=${APP_DB_PASSWORD:-postgres}
-      - POSTGRES_USER=${APP_DB_USERNAME:-postgres}
+      - "POSTGRES_DB=postgres"
+      - "POSTGRES_PASSWORD=su"
+      - "POSTGRES_USER=su"
     ports:
-      - ${APP_DB_PORT:-5432}:${APP_DB_PORT:-5432}
+      - "5432:5432"
     volumes:
       - ./pg-data:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD", "pg_isready", "-q", "-U", "${APP_DB_USERNAME:-postgres}" ]
+      test: [ "CMD-SHELL", "pg_isready", "-d", "postgres", "-U", "su" ]
       interval: 5s
       timeout: 1s
       retries: 2
@@ -46,8 +48,10 @@ services:
     environment:
       - MINIO_ROOT_USER=minioadmin
       - MINIO_ROOT_PASSWORD=minioadmin
+    command: server --console-address ":9090" /data
     ports:
       - "9000:9000"
+      - "9090:9090"
     volumes:
       - ~/minio/data:/data
     networks:

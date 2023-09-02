@@ -2,9 +2,17 @@ package postgres
 
 import (
 	"context"
-	"net/url"
+	"errors"
+	"fmt"
+	"path"
+	"runtime"
 
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jackc/pgx/v4/pgxpool"
+	_ "github.com/lib/pq"
+	log "github.com/sirupsen/logrus"
 )
 
 type Repository struct {
@@ -12,14 +20,7 @@ type Repository struct {
 }
 
 func New(ctx context.Context, cfg *Config) (*Repository, error) {
-	databaseURL, err := url.Parse(cfg.URL)
-	if err != nil {
-		return nil, err
-	}
-
-	databaseURL.User = url.UserPassword(cfg.Username, cfg.Password)
-
-	connConfig, err := pgxpool.ParseConfig(databaseURL.String())
+	connConfig, err := pgxpool.ParseConfig(cfg.URL)
 	if err != nil {
 		return nil, err
 	}
@@ -37,4 +38,26 @@ func New(ctx context.Context, cfg *Config) (*Repository, error) {
 
 func (r *Repository) Close() {
 	r.db.Close()
+}
+
+func ApplyMigrate(databaseUrl, migrationsDir string) error {
+	_, filename, _, ok := runtime.Caller(0)
+	if !ok {
+		return fmt.Errorf("could not find migration path")
+	}
+	dir := path.Join(path.Dir(filename), migrationsDir)
+
+	mig, err := migrate.New(
+		fmt.Sprintf("file://%s", dir),
+		databaseUrl)
+	if err != nil {
+		log.Errorf("failed to create migrations instance: %v", err)
+		return err
+	}
+
+	if err := mig.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
+		log.Errorf("could not exec migration: %v", err)
+		return err
+	}
+	return nil
 }

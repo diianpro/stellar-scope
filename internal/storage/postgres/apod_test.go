@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/diianpro/stellar-scope/internal/domain/apod"
+	"github.com/diianpro/stellar-scope/internal/domain/image"
 )
 
 func (i *IntegrationTestSuite) TestIntegrationCreate() {
@@ -12,8 +13,8 @@ func (i *IntegrationTestSuite) TestIntegrationCreate() {
 
 	data := apod.Data{
 		Explanation: "test",
-		Date:        "test",
-		Image:       nil,
+		Date:        time.Now().Format(time.DateOnly),
+		Image:       &image.Image{},
 		Copyright:   "test",
 	}
 

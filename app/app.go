@@ -6,7 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	awsconf "github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/sync/errgroup"
@@ -63,12 +64,50 @@ func (a *App) Start() {
 	}
 	defer repo.Close()
 
-	awsConfig, err := awsconf.LoadDefaultConfig(a.ctx, awsconf.WithRegion(a.cfg.ImageStorage.Region))
-	if err != nil {
-		log.Fatal(err)
+	if err = postgres.ApplyMigrate(a.cfg.Postgres.URL, "../../../migration"); err != nil {
+		log.Fatal("Could not apply migrations.")
+	}
+
+	//awsConfig, err := awsconf.LoadDefaultConfig(a.ctx, awsconf.WithRegion(a.cfg.ImageStorage.Region))
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+
+	// make for testing s3 storage
+	const defaultRegion = "us-east-1"
+	awsConfig := aws.Config{
+		Region:      defaultRegion,
+		Credentials: credentials.NewStaticCredentialsProvider("minioadmin", "minioadmin", ""),
+		EndpointResolverWithOptions: aws.EndpointResolverWithOptionsFunc(func(service, region string, options ...interface{}) (aws.Endpoint, error) {
+			return aws.Endpoint{
+				PartitionID:       "aws",
+				URL:               fmt.Sprintf("http://%s", "localhost:9000"),
+				SigningRegion:     defaultRegion,
+				HostnameImmutable: true,
+			}, nil
+		}),
 	}
 
 	s3Storage := s3.NewFromConfig(awsConfig)
+	var isBucketExists bool
+	listBuckets, err := s3Storage.ListBuckets(a.ctx, &s3.ListBucketsInput{})
+	if err != nil {
+		log.Fatal("Could not list buckets.")
+	}
+	for _, bucket := range listBuckets.Buckets {
+		if *bucket.Name == a.cfg.ImageStorage.Bucket {
+			isBucketExists = true
+		}
+	}
+	if !isBucketExists {
+		_, err = s3Storage.CreateBucket(context.Background(), &s3.CreateBucketInput{
+			Bucket: aws.String(a.cfg.ImageStorage.Bucket),
+		})
+		if err != nil {
+			log.Fatal("Could not create bucket.")
+		}
+	}
+
 	imageRps := imagestor.New(a.cfg.ImageStorage.Bucket, s3Storage)
 
 	t := http.DefaultTransport.(*http.Transport).Clone()

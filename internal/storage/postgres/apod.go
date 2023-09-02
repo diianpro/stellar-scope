@@ -2,8 +2,9 @@ package postgres
 
 import (
 	"context"
-	"github.com/jackc/pgx/v4"
 	"time"
+
+	"github.com/jackc/pgx/v4"
 
 	_ "github.com/jackc/pgx/v4"
 	"github.com/labstack/gommon/log"
@@ -44,7 +45,7 @@ func (r *Repository) GetAll(ctx context.Context, limit, offset int) ([]apod.Data
 func (r *Repository) Create(ctx context.Context, data *apod.Data) error {
 	_, err := r.db.Exec(ctx, `INSERT INTO image ("date", title, explanation, image_extension, copyright) 
 		VALUES ($1, $2, $3, $4, $5) ON CONFLICT DO NOTHING`,
-		time.Now().Format(time.DateOnly),
+		data.Date,
 		data.Image.Title,
 		data.Explanation,
 		data.Image.Extension,
@@ -59,10 +60,12 @@ func (r *Repository) getByDate(row pgx.Row) (*apod.Data, error) {
 	apod := &apod.Data{
 		Image: &image.Image{},
 	}
-	err := row.Scan(&apod.Date, &apod.Image.Title, &apod.Explanation, &apod.Image.Extension, &apod.Copyright)
+	tt := time.Time{}
+	err := row.Scan(&tt, &apod.Image.Title, &apod.Explanation, &apod.Image.Extension, &apod.Copyright)
 	if err != nil {
 		log.Errorf("images db: getByDate error: %v", err)
 		return nil, err
 	}
+	apod.Date = tt.Format(time.DateOnly)
 	return apod, nil
 }

@@ -1,12 +1,13 @@
 # syntax=docker/dockerfile:1
-FROM golang:1.21.0
+FROM golang:1.21.0 as builder
 
 COPY . /app
 WORKDIR /app
-RUN go mod download
-RUN go build -o stellar-scope ./cmd/stellar-scope/main.go
+RUN CGO_ENABLED=0 go build -o "stellar-scope" ./cmd/stellar-scope/main.go
 
-CMD [ "/app/stellar-scope" ]
+FROM golang:1.21-alpine
+COPY --from=builder /app/stellar-scope ./
+CMD ["./stellar-scope"]
 
 
 
