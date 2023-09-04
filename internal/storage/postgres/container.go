@@ -40,7 +40,7 @@ func NewContainer(config *Config, connectFn func() error) (*Container, error) {
 			Env: []string{
 				"POSTGRES_USER=su",
 				"POSTGRES_PASSWORD=su",
-				"POSTGRES_DB=images",
+				"POSTGRES_DB=postgres",
 				"listen_addresses = '*'",
 			},
 			PortBindings: map[docker.Port][]docker.PortBinding{
@@ -64,7 +64,7 @@ func NewContainer(config *Config, connectFn func() error) (*Container, error) {
 	}
 	addr := fmt.Sprintf("%s:%s", hostName, resource.GetPort(defaultPostgresPort))
 	if err := pool.Retry(func() error {
-		config.URL = fmt.Sprintf("postgres://su:su@%s/images?sslmode=disable", addr)
+		config.URL = fmt.Sprintf("postgres://su:su@%s/postgres?sslmode=disable", addr)
 		return connectFn()
 	}); err != nil {
 		log.Fatalf("Could not connect to docker: %s", err)

@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"net/http"
 	"strconv"
+	"time"
 
+	"github.com/hashicorp/go-retryablehttp"
 	"github.com/ory/dockertest"
 	"github.com/ory/dockertest/docker"
 )
@@ -59,8 +60,10 @@ func NewContainer() (*Container, error) {
 	addr := fmt.Sprintf("%s:%s", defaultHostName, resource.GetPort("9000/tcp"))
 	uri := fmt.Sprintf("http://%s/minio/health/live", addr)
 	container.addr = addr
+	retryClient := retryablehttp.NewClient()
+	retryClient.HTTPClient.Timeout = 5 * time.Second
 	if err = pool.Retry(func() error {
-		if _, livenessErr := http.Get(uri); livenessErr != nil {
+		if _, err := retryClient.Get(uri); err != nil {
 			return err
 		}
 		return nil

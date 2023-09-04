@@ -33,7 +33,7 @@ func New(bucket string, cli *s3.Client) *Storage {
 func (s *Storage) Get(ctx context.Context, date string) ([]byte, error) {
 	output, err := s.cli.GetObject(ctx, &s3.GetObjectInput{
 		Bucket: aws.String(s.bucket),
-		Key:    aws.String(time.DateOnly),
+		Key:    aws.String(date),
 	})
 	if err != nil {
 		var noSuchKey *types.NoSuchKey

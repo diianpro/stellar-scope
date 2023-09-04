@@ -29,6 +29,7 @@ func (r *Repository) GetAll(ctx context.Context, limit, offset int) ([]apod.Data
 	defer row.Close()
 
 	var result []apod.Data
+
 	for row.Next() {
 		apod, err := r.getByDate(row)
 		if err != nil {
