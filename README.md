@@ -1,4 +1,4 @@
-# Star Sight
+# About the service
 
 A complete example of a service (Stellar Service) created using Golang.
 
