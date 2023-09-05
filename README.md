@@ -22,7 +22,7 @@ Follow these simple steps to run Stellar-Scope on your local computer:
 2. **Setting environment variables**: Create a `.env` file in the root directory of the project and set the necessary environment variables.
    These variables should include your PostgreSQL and Minio database settings to ensure that the service works correctly.
 
-3. **Start the Service**: Run the following command to start the project and start the service:
+3. **Start the Service**: Run the following command `make up` to start the project.
    This command initializes Docker containers and creates a database if it does not already exist.
 
 4. **Get access to the service**: You can access it through your web browser at [http://localhost:8080 ](http://localhost:8080 ).
