@@ -22,8 +22,6 @@ Follow these simple steps to run Stellar-Scope on your local computer:
 2. **Start the Service**: Run the following command `make up` to start the project.
    This command initializes Docker containers and creates a database if it does not already exist.
 
-3. **Get access to the service**: You can access it through your web browser at [http://localhost:8080 ](http://localhost:8080 ).
-
 ## Stopping the service
 
 To stop the project, run the `make down` command. This will stop Docker containers.
