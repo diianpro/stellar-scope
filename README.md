@@ -6,7 +6,7 @@ A complete example of a service (Stellar Service) created using Golang.
 
 Stellar-Scope has three main goals:
 
-1. ** Getting APOD data **: The service extracts metadata and a picture of the day from [APOD] on a daily basis (https://api.nasa.gov/).
+1. ** Getting APOD data **: The service extracts metadata and a picture of the day from [APOD]https://api.nasa.gov/) on a daily basis.
    Then this data is securely stored in Minio, Postgresql.
 
 2. ** HTTP API Server **: HTTP API, allows you to access all album recordings and extract certain recordings for a selected day.
