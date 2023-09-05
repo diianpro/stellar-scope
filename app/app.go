@@ -60,7 +60,7 @@ func (a *App) Start() {
 
 	repo, err := postgres.New(a.ctx, &a.cfg.Postgres)
 	if err != nil {
-		log.Fatal("Could not setup storage.")
+		log.Fatalf("Could not setup storage %v", err)
 	}
 	defer repo.Close()
 
@@ -81,7 +81,7 @@ func (a *App) Start() {
 		EndpointResolverWithOptions: aws.EndpointResolverWithOptionsFunc(func(service, region string, options ...interface{}) (aws.Endpoint, error) {
 			return aws.Endpoint{
 				PartitionID:       "aws",
-				URL:               fmt.Sprintf("http://%s", "localhost:9000"),
+				URL:               fmt.Sprintf("http://%s", "minio:9000"),
 				SigningRegion:     defaultRegion,
 				HostnameImmutable: true,
 			}, nil
@@ -89,11 +89,13 @@ func (a *App) Start() {
 	}
 
 	s3Storage := s3.NewFromConfig(awsConfig)
-	var isBucketExists bool
-	listBuckets, err := s3Storage.ListBuckets(a.ctx, &s3.ListBucketsInput{})
+
+	listBuckets, _ := s3Storage.ListBuckets(a.ctx, &s3.ListBucketsInput{})
 	if err != nil {
-		log.Fatal("Could not list buckets.")
+		log.Fatalf("Could not list buckets: %+v", err)
 	}
+
+	var isBucketExists bool
 	for _, bucket := range listBuckets.Buckets {
 		if *bucket.Name == a.cfg.ImageStorage.Bucket {
 			isBucketExists = true
@@ -104,7 +106,7 @@ func (a *App) Start() {
 			Bucket: aws.String(a.cfg.ImageStorage.Bucket),
 		})
 		if err != nil {
-			log.Fatal("Could not create bucket.")
+			log.Fatalf("Could not create bucket: %+v", err)
 		}
 	}
 

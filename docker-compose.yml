@@ -4,37 +4,38 @@ services:
   stellar-scope:
     build:
       context: .
-    ports:
-      - "8080:1323"
     restart: on-failure
     container_name: astro
     environment:
-      - DB_URL=${DB_URL:-postgres://su:su@localhost:5432/postgres?sslmode=disable}
+      - DB_URL=${DB_URL:-postgres://su:su@postgres:5432/image?sslmode=disable}
       - MIN_CONNS=${MIN_CONNS:-1}
       - MAX_CONNS=${MAX_CONNS:-3}
       - APOD_ADDRESS=${APOD_ADDRESS:-https://api.nasa.gov/planetary/apod}
       - APOD_API_KEY=${APOD_API_KEY:-uqe4UgO54kToru7pU6PqJDdmlhuMXxpkzEbpHQZV}
       - BUCKET=${BUCKET:-images}
       - REGION=${REGION:-us-east-1}
+    ports:
+      - "8080:1323"
     networks:
       - astro
     depends_on:
       - minio
       - postgres
+
   postgres:
-    container_name: postgresql
+    container_name: postgres
     image: postgres:15-alpine
     restart: always
     environment:
-      - POSTGRES_DB=postgres
+      - POSTGRES_DB=image
       - POSTGRES_PASSWORD=su
       - POSTGRES_USER=su
     ports:
       - "5432:5432"
     volumes:
-      - ./pg-data:/var/lib/postgresql/data
+      - /pg-data:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -d postgres -U su"]
+      test: [ "CMD-SHELL", "pg_isready -d image -U su"]
       interval: 5s
       timeout: 1s
       retries: 2
