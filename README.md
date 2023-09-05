@@ -31,9 +31,9 @@ Follow these simple steps to run Stellar-Scope on your local computer:
 
 To stop the project, run the `make down` command. This will stop Docker containers.
 
-## Service Registration
+## Logging
 
-To view the service logs, run the Create Logs command.
+To view the service logs, run the`make logs` command.
 
 ## View the status of containers
 To view the status of Docker containers, run the `make ps` command.
